@@ -1,0 +1,36 @@
+#!/bin/sh
+# chkconfig: - 80 20
+# description: Xvfb control script
+
+XVFB_USER=xvfb
+XVFB_STARTUP_LOG=/home/${XVFB_USER}/xvfb.log
+
+if [ -z "$1" ]; then
+    echo "`basename $0` {start|stop}"
+    exit
+fi
+
+if [ -x /sbin/runuser ]; then
+    SU=runuser
+else
+    SU=su
+fi
+
+start() {
+    echo "Starting Xvfb..."
+    if [ -z "$XVFB_USER" ]; then
+        nohup /usr/bin/Xvfb :99 -ac> $XVFB_STARTUP_LOG 2>&1 &
+    else
+        $SU -l $XVFB_USER -c "nohup /usr/bin/Xvfb :99 -ac > $XVFB_STARTUP_LOG 2>&1" &
+    fi
+}
+
+stop() {
+    echo "Stopping Xvfb..."
+    killall Xvfb
+}
+
+case "$1" in
+    start) shift; start;;
+    stop) shift; stop;;
+esac
